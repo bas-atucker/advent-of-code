@@ -12,71 +12,79 @@ struct Location {
     y: i32
 }
 
-static mut HEADING: Heading = Heading::North;
-static mut LOCATION: Location = Location {x: 0, y: 0};
-
 fn main() {
     let steps: Vec<&str> = INPUT.split(", ").collect();
+    
+    // Location history
     let mut history: Vec<(i32, i32)> = vec![];
+    let mut location: Location = Location {x: 0, y: 0};
+    let mut heading: Heading = Heading::North;
         
-    unsafe {
-        for step in &steps {
-            match step.split_at(1) {
-                ("L", dist) => {
-                    turn_left();
-                    move_dist(dist);
-                },
-                ("R", dist) => {
-                    turn_right();
-                    move_dist(dist);
-                },
-                _ => {}
-            }
-            if check_history(&mut history) {break;}
+    for step in &steps {
+        match step.split_at(1) {
+            ("L", dist) => {
+                heading = turn_left(&heading);
+                if move_dist(&mut location, &heading, dist, &mut history) { break; }
+            },
+            ("R", dist) => {
+                heading = turn_right(&heading);
+                if move_dist(&mut location, &heading, dist, &mut history) { break; }
+            },
+            _ => {}
         }
-
-        println!("({},{}); {} total blocks", LOCATION.x, LOCATION.y, LOCATION.x.abs() + LOCATION.y.abs());
     }
+
+    println!("Reached a location twice!\n({},{}); {} total blocks from the starting location.", 
+             location.x, location.y, location.x.abs() + location.y.abs());
 }
 
-unsafe fn check_history(history: &mut Vec<(i32, i32)>) -> bool {
-    let curr = (LOCATION.x, LOCATION.y);
-    if history.contains(&curr) { 
+fn check_history(history: &mut Vec<(i32, i32)>, loc: &Location) -> bool {
+    let curr = (loc.x, loc.y);
+    if history.contains(&curr) {
         true
     } else {
-        history.push((LOCATION.x, LOCATION.y));
+        history.push((loc.x, loc.y));
         false
     }
 }
 
-unsafe fn turn_left() {
-    HEADING = match HEADING {
-        Heading::North => Heading::West,
-        Heading::West => Heading::South,
-        Heading::South => Heading::East,
-        Heading::East => Heading::North
+fn turn_left(heading: &Heading) -> Heading {
+    match heading {
+        &Heading::North => Heading::West,
+        &Heading::West => Heading::South,
+        &Heading::South => Heading::East,
+        &Heading::East => Heading::North
     }
 }
 
-unsafe fn turn_right() {
-    HEADING = match HEADING {
-        Heading::West => Heading::North,
-        Heading::North => Heading::East,
-        Heading::East => Heading::South,
-        Heading::South => Heading::West
+fn turn_right(heading: &Heading) -> Heading {
+    match heading {
+        &Heading::West => Heading::North,
+        &Heading::North => Heading::East,
+        &Heading::East => Heading::South,
+        &Heading::South => Heading::West
     }
 }
 
-unsafe fn move_dist(dist: &str) {
+fn move_dist(mut loc: &mut Location,
+             heading: &Heading,
+             dist: &str, 
+             mut history: &mut Vec<(i32, i32)>) -> bool {
     let dist_int = match dist.parse::<i32>() {
         Ok(val) => val,
         Err(_) => 0
     };
 
-    match HEADING {
-        Heading::North => LOCATION.y += dist_int,
-        Heading::West  => LOCATION.x -= dist_int,
-        Heading::South => LOCATION.y -= dist_int,
-        Heading::East  => LOCATION.x += dist_int
+    for _ in 0..dist_int {
+        match heading {
+            &Heading::North => loc.y += 1,
+            &Heading::West  => loc.x -= 1,
+            &Heading::South => loc.y -= 1,
+            &Heading::East  => loc.x += 1
+        };
+
+        if check_history(&mut history, &loc) { return true; }
     }
+
+    false
 }

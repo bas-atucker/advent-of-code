@@ -25,6 +25,9 @@ fn main() {
     }
 }
 
+//------------------------------------------------------------------------------
+// Cypher helper, roll a character by `n`, where a->b, b->c, z->a.
+//------------------------------------------------------------------------------
 fn roll(ch: char, n: u32) -> char {
     if ch == '-' { 
         ' '
@@ -35,6 +38,11 @@ fn roll(ch: char, n: u32) -> char {
     }
 }
 
+//------------------------------------------------------------------------------
+// Parse out the five most commonly occurring letters in a string, returned
+// as a String ordered from most-occurring to least occurring. Ties are broken
+// alphabetically.
+//------------------------------------------------------------------------------
 fn get_checksum(text: &str) -> String {
     let no_dash = text.replace("-", "");
     let no_numeric = no_dash.replace(char::is_numeric, "");

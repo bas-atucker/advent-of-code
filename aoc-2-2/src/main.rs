@@ -4,52 +4,41 @@ RURLURRDLDULLULDDDLRUULLUURLRUDRUDRRUDDLDDDDRRDLRURLRURLDDDUDDUURRDRULDRRRULRDRD
 RLRDRDULULUDLUDRDRLUDLDLLUDURULDDDUDLRURLLRLRLDLDRLDURDLRRURLULLULURLLDRRDRLUDRLRDLLULRULURRURURUULRDUDLLRDLRRRRRLUURDRRRDLRUDLLDLLDLRUUUDLLLDDDLRDULLRUUDDRLDDURRRDLRLRLDDDDLRDRULLUURUUDRRLLRLLRDDLLRURRRRDRULRRLLRLLLRLDRRLDDDURRURLDURUURRLRLRLDRURULLRLRUDLDUURDLLRLDLURUUUDLLRDRDDDDDDRLDRRRLRRRRURUDLDDRDLLURUDLRRLDDDLUDUDUULRDULULUDDULUUDLLLLRLDDUUULRLRDULURDURRRURRULURRRDRDLDDURDLURUDURRRDDRLRLUDLUDDLUULLDURLURDDUDDLRUUUDRLLDRURL
 ULUDLLUDDULRUURDRURDUDUDLUURDDDRRLUDURURDRURRLDRDURLRLLRRDDRRDRRRUULURUDURUDULRRRRDDLDURRLRRDUDDDRLLLULDRLRLURRDUURDURRRURRDLUDUDDRLDLURRRDDRLLRDRDDRDURRRRLURRLUDDURRULRUDUDULDRUDDRULLUUULDURRRLDRULLURULLRUDLDUDDLDULDLUUDRULULDLLDRULLRUULDUDUUDRLRRLDLUULUDLLDDRLRRDDLLURURDULRRDDRURDRLRLULDLDURULLUUUDURURDLDUDDDDUUULUDLUURRULLDLRLURDLURLRLDDURRLDDRRRDUUULLUULDLLDLLDDRLRRUDLULDRLULDULULRRLRULUUURURUUURDUUDDURLLUDDRLRDDLUURRUULRDLDDRLULUULRDRURLUURDRDUURUDLRR"#;
 
-struct Key {
-    x: i8,
-    y: i8
-}
+use std::cmp;
+use std::collections::HashMap;
 
 fn main() {
+    let mut keys: HashMap<(i8,i8), &str> = HashMap::new();
+
+    keys.insert((2,0),"1"); 
+    keys.insert((1,1),"2"); keys.insert((2,1),"3"); keys.insert((3,1),"4"); 
+    keys.insert((0,2),"5"); keys.insert((1,2),"6"); keys.insert((2,2),"7"); keys.insert((3,2),"8"); keys.insert((4,2),"9");
+    keys.insert((1,3),"A"); keys.insert((2,3),"B"); keys.insert((3,3),"C"); 
+    keys.insert((2,4),"D"); 
+
     let steps: Vec<&str> = INPUT.split("\n").collect();
-    println!("{}", steps.len());
-    let mut key: Key = Key { x: 0, y: 2 };
+
+    let mut key: (i8, i8) = (1,1);
     let mut code: String = String::from("");
 
     for step in &steps {
-        traverse(&mut key, &step);
-        code += translate(key.x, key.y).as_str();
+        key = traverse(key, &step, &keys);
+        code += keys.get(&key).unwrap();
     }
 
     println!("{}", code);
 }
 
-fn traverse(key: &mut Key, script: &str) {
+fn traverse(key: (i8, i8), script: &str, keys: &HashMap<(i8,i8), &str>) -> (i8, i8) {
+    let mut k = key;
     for c in script.chars() {
-        match (c, key.x, key.y) {
-            ('L', 2, 1) | ('L', 3, 1) | ('L', 1, 2) | ('L', 2, 2) | ('L', 3, 2) | ('L', 4, 2) | ('L', 2, 3) | ('L', 3, 3) => key.x -= 1,
-            ('D', 2, 0) | ('D', 1, 1) | ('D', 2, 1) | ('D', 3, 1) | ('D', 1, 2) | ('D', 2, 2) | ('D', 3, 2) | ('D', 2, 3) => key.y += 1,
-            ('R', 1, 1) | ('R', 2, 1) | ('R', 0, 2) | ('R', 1, 2) | ('R', 2, 2) | ('R', 3, 2) | ('R', 1, 3) | ('R', 2, 3) => key.x += 1,
-            ('U', 2, 1) | ('U', 1, 2) | ('U', 2, 2) | ('U', 3, 2) | ('U', 1, 3) | ('U', 2, 3) | ('U', 3, 3) | ('U', 2, 4) => key.y -= 1,
-            _ => {}
-        }
+        k = match c {
+            'L' if keys.contains_key(&(k.0-1,k.1)) => (k.0-1,k.1),
+            'D' if keys.contains_key(&(k.1+1,k.1)) => (k.1+1,k.1),
+            'R' if keys.contains_key(&(k.0+1,k.1)) => (k.0+1,k.1),
+            'U' if keys.contains_key(&(k.1-1,k.1)) => (k.1-1,k.1),
+            _ => k
+        };
     }
-}
-
-fn translate(x:i8, y:i8) -> String {
-    match (x,y) {
-        (2,0) => String::from("1"),
-        (1,1) => String::from("2"),
-        (2,1) => String::from("3"),
-        (3,1) => String::from("4"),
-        (0,2) => String::from("5"),
-        (1,2) => String::from("6"),
-        (2,2) => String::from("7"),
-        (3,2) => String::from("8"),
-        (4,2) => String::from("9"),
-        (1,3) => String::from("A"),
-        (2,3) => String::from("B"),
-        (3,3) => String::from("C"),
-        (2,4) => String::from("D"),
-        _ => unreachable!()
-    }
+    k
 }

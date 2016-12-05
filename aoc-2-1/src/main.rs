@@ -5,34 +5,38 @@ RLRDRDULULUDLUDRDRLUDLDLLUDURULDDDUDLRURLLRLRLDLDRLDURDLRRURLULLULURLLDRRDRLUDRL
 ULUDLLUDDULRUURDRURDUDUDLUURDDDRRLUDURURDRURRLDRDURLRLLRRDDRRDRRRUULURUDURUDULRRRRDDLDURRLRRDUDDDRLLLULDRLRLURRDUURDURRRURRDLUDUDDRLDLURRRDDRLLRDRDDRDURRRRLURRLUDDURRULRUDUDULDRUDDRULLUUULDURRRLDRULLURULLRUDLDUDDLDULDLUUDRULULDLLDRULLRUULDUDUUDRLRRLDLUULUDLLDDRLRRDDLLURURDULRRDDRURDRLRLULDLDURULLUUUDURURDLDUDDDDUUULUDLUURRULLDLRLURDLURLRLDDURRLDDRRRDUUULLUULDLLDLLDDRLRRUDLULDRLULDULULRRLRULUUURURUUURDUUDDURLLUDDRLRDDLUURRUULRDLDDRLULUULRDRURLUURDRDUURUDLRR"#;
 
 use std::cmp;
-
-struct Key {
-    x: i8,
-    y: i8
-}
+use std::collections::HashMap;
 
 fn main() {
+    let mut keys: HashMap<(i8,i8), &str> = HashMap::new();
+
+    keys.insert((0,0),"1"); keys.insert((1,0),"2"); keys.insert((2,0),"3");
+    keys.insert((0,1),"4"); keys.insert((1,1),"5"); keys.insert((2,1),"6");
+    keys.insert((0,2),"7"); keys.insert((1,2),"8"); keys.insert((2,2),"9");
+
     let steps: Vec<&str> = INPUT.split("\n").collect();
-    println!("{}", steps.len());
-    let mut key: Key = Key { x: 1, y: 1 };
+
+    let mut key: (i8, i8) = (1,1);
     let mut code: String = String::from("");
 
     for step in &steps {
-        traverse(&mut key, &step);
-        code += ((key.y) * 3 + (key.x+1)).to_string().as_str();
+        key = traverse(key, &step, &keys);
+        code += keys.get(&key).unwrap();
     }
 
     println!("{}", code);
 }
 
-fn traverse(key: &mut Key, script: &str) {
+fn traverse(key: (i8, i8), script: &str, keys: &HashMap<(i8,i8), &str>) -> (i8, i8) {
+    let mut k = key;
     for c in script.chars() {
-        match c {
-            'L' => key.x = cmp::max(0, key.x - 1),
-            'D' => key.y = cmp::min(2, key.y + 1),
-            'R' => key.x = cmp::min(2, key.x + 1),
-            'U' => key.y = cmp::max(0, key.y - 1),
-            _ => unreachable!()
-        }
+        k = match c {
+            'L' if keys.contains_key(&(k.0-1,k.1)) => (k.0-1,k.1),
+            'D' if keys.contains_key(&(k.1+1,k.1)) => (k.1+1,k.1),
+            'R' if keys.contains_key(&(k.0+1,k.1)) => (k.0+1,k.1),
+            'U' if keys.contains_key(&(k.1-1,k.1)) => (k.1-1,k.1),
+            _ => k
+        };
     }
+    k
 }
