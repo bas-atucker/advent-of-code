@@ -1,5 +1,5 @@
 [root]
-name = "aoc-5-1"
+name = "aoc-5-2"
 version = "0.1.0"
 dependencies = [
  "md5 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
