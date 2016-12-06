@@ -1,5 +1,3 @@
-#![feature(slice_patterns)]
-
 extern crate md5;
 use std::collections::BTreeMap;
 
