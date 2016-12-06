@@ -1,21 +1,19 @@
 use std::collections::HashMap;
 
 fn get_password(input: &str) -> String {
-    let lines: Vec<String> = input.split("\n").map(|line| String::from(line)).collect();
-    let map: HashMap<u8, u32> = HashMap::new();
-    let mut chars = vec![map.clone(); 8];
+    let mut chars = vec![HashMap::new(); 8];
     let mut result = String::from("");
 
-    for line in &lines {
+    for line in &input.split("\n").collect::<Vec<&str>>() {
         for (i, val) in line.bytes().enumerate() {
-            *chars[i].entry(val as u8).or_insert(0) += 1;
+            *chars[i].entry(val).or_insert(0) += 1;
         }
     }
 
     for ch in chars {
         result.push(ch
             .iter()
-            .fold(('_' as u8,0xFF), |min, curr| if curr.1 < &min.1 { (*curr.0, *curr.1) } else { min })
+            .fold((0x00, 0xFF), |min, curr| if curr.1 < &min.1 { (*curr.0, *curr.1) } else { min })
             .0 as char);
     }
     result
